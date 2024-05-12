@@ -1,23 +1,36 @@
 #!/bin/sh
-yum -y install squid
-yum -y install httpd
-yum -y install expect
-yum -y update openssl
+#パッケージのインストール
+sudo yum -y install squid
+sudo yum -y install httpd
+sudo yum -y install expect
+#ポート開放
+sudo firewall-cmd --zone=public --add-port=userport/tcp --permanent
+sudo firewall-cmd --reload
+#認証用ユーザーの作成
+ID="userid"
 PW="userpass"
 expect -c "
 set timeout 20
-spawn htpasswd -c /etc/squid/.htpasswd userid
+spawn htpasswd -c /etc/squid/.htpasswd \"${ID}\n\"
 expect \"password:\"
 send \"${PW}\n\"
 expect \"password:\"
 send \"${PW}\n\"
 expect \"$\"  exit 0" 
-sed -i -e "61,73d" /etc/squid/squid.conf
-sed -i -e '27i auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid/.htpasswd\nauth_param basic children 5\nauth_param basic realm Squnewid Basic Authentication\nauth_param basic credentialsttl 24 hours\nacl password proxy_auth REQUIRED\nhttp_access allow password\n\nforwarded_for off\nrequest_header_access Referer deny all\nrequest_header_access X-Forwarded-For deny all\nrequest_header_access Via deny all\nrequest_header_access Cache-Control deny all\nvisible_hostname unknown\nno_cache deny all\n' /etc/squid/squid.conf
-sed -i 's/3128/userport/g' /etc/squid/squid.conf
-firewall-cmd --zone=public --add-port=userport/tcp --permanent
-firewall-cmd --reload
-/etc/rc.d/init.d/iptables stop
-systemctl enable squid
-systemctl start squid
-rm -f script.sh
+#プロキシサーバー経由での接続を隠蔽 
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\forwarded_for off' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\request_header_access X-Forwarded-For deny all' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\request_header_access Via deny all' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\request_header_access Cache-Control deny all' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\no_cache deny all' /etc/squid/squid.conf
+#Basic認証用の設定
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\http_access allow password' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\acl password proxy_auth REQUIRED' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid/.htpasswd' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\auth_param basic children 5' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\auth_param basic realm Basic Authentication' /etc/squid/squid.conf
+sudo sed -i -e '/acl CONNECT method CONNECT/ a\auth_param basic credentialsttl 24 hours' /etc/squid/squid.conf
+#サービス起動設定
+sudo systemctl enable squid
+sudo systemctl start squid
+sudo systemctl status squid.service
