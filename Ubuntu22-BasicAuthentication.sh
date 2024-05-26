@@ -2,6 +2,9 @@
 #Failed to fetchエラーになる場合の対応
 sudo rm -rf /var/lib/apt/lists/*
 sudo apt-get update
+#パッケージのアンインストール
+sudo apt remove squid -y
+sudo rm -f /etc/squid/squid.conf
 #パッケージのインストール
 sudo apt install squid -y
 #ポート開放
