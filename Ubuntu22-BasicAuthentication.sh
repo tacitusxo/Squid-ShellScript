@@ -3,15 +3,15 @@
 sudo rm -rf /var/lib/apt/lists/*
 sudo apt-get update
 #パッケージのアンインストール
-sudo apt remove squid -y
+sudo apt purge squid -y
 sudo rm -f /etc/squid/squid.conf
 sudo rm -f /etc/squid/.htpasswd
 #パッケージのインストール
 sudo apt install squid -y
 #ポート開放
-sudo ufw allow userport
+sudo ufw allow $3
 #認証用ユーザーの作成
-sudo sh -c "echo -n 'userid:$(openssl passwd -apr1 userpass)\n' >> /etc/squid/.htpasswd"
+sudo sh -c "echo -n '$1:$(openssl passwd -apr1 $2)\n' >> /etc/squid/.htpasswd"
 #プロキシサーバー経由での接続を隠蔽 
 sudo sed -i -e '/http_access allow localhost manager/ i\forwarded_for off' /etc/squid/squid.conf
 sudo sed -i -e '/http_access allow localhost manager/ i\request_header_access X-Forwarded-For deny all' /etc/squid/squid.conf
@@ -25,7 +25,7 @@ sudo sed -i -e '/http_access allow localhost manager/ i\auth_param basic realm B
 sudo sed -i -e '/http_access allow localhost manager/ i\auth_param basic credentialsttl 24 hours' /etc/squid/squid.conf
 sudo sed -i -e '/http_access allow localhost manager/ i\acl password proxy_auth REQUIRED' /etc/squid/squid.conf
 sudo sed -i -e '/http_access allow localhost manager/ i\http_access allow password' /etc/squid/squid.conf
-sudo sed -i -e 's/3128/userport/g' /etc/squid/.htpasswd
+sudo sed -i -e "s/3128/$3/g" /etc/squid/squid.conf
 #サービス起動設定
 sudo systemctl enable squid
 sudo systemctl restart squid
