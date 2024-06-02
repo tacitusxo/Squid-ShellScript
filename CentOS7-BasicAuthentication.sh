@@ -8,7 +8,7 @@ sudo yum -y install squid
 sudo yum -y install httpd
 sudo yum -y install expect
 #ポート開放
-sudo firewall-cmd --zone=public --add-port=3128/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=userport/tcp --permanent
 sudo firewall-cmd --reload
 #認証用ユーザーの作成
 ID="userid"
@@ -34,6 +34,7 @@ sudo sed -i -e '/http_access allow localhost manager/ a\auth_param basic program
 sudo sed -i -e '/http_access allow localhost manager/ a\auth_param basic children 5' /etc/squid/squid.conf
 sudo sed -i -e '/http_access allow localhost manager/ a\auth_param basic realm Basic Authentication' /etc/squid/squid.conf
 sudo sed -i -e '/http_access allow localhost manager/ a\auth_param basic credentialsttl 24 hours' /etc/squid/squid.conf
+sudo sed -i -e 's/3128/userport/g' /etc/squid/.htpasswd
 #サービス起動設定
 sudo systemctl enable squid
 sudo systemctl restart squid
