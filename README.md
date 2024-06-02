@@ -7,16 +7,14 @@
 # Installation  
 ```bash
 // CentOS 7
-sh CentOS6-BasicAuthentication.sh
+sh CentOS7-BasicAuthentication.sh id pass 3128
 
 // Ubuntu 22
-sh Ubuntu22-BasicAuthentication.sh
+sh Ubuntu22-BasicAuthentication.sh id pass 3128
 ```
 
 # Usage
-If necessary, rewrite it with your own authentication information in the file.
-userid
-userpass
+If necessary, change the optional arguments
 
 # Note
 Some servers require sudo before the command
