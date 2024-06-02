@@ -5,6 +5,7 @@ sudo apt-get update
 #パッケージのアンインストール
 sudo apt remove squid -y
 sudo rm -f /etc/squid/squid.conf
+sudo rm -f /etc/squid/.htpasswd
 #パッケージのインストール
 sudo apt install squid -y
 #ポート開放

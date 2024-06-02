@@ -2,6 +2,7 @@
 #パッケージのアンインストール
 sudo yum -y remove squid
 sudo rm -f /etc/squid/squid.conf
+sudo rm -f /etc/squid/.htpasswd
 #パッケージのインストール
 sudo yum -y install squid
 sudo yum -y install httpd
